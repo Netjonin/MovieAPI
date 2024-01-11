@@ -49,7 +49,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 
 	err := dec.Decode(dst)
 	if err != nil {
-		// If there is an error during decoding, start the triage...
+		
 		var syntaxError *json.SyntaxError
 		var unmarshalTypeError *json.UnmarshalTypeError
 		var invalidUnmarshalError *json.InvalidUnmarshalError
