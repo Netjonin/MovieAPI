@@ -1,9 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"greenlight.netjonin.net/internal/data"
 	"greenlight.netjonin.net/internal/validator"
@@ -33,16 +33,16 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	
+
 	err = app.models.Movies.Insert(movie)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	
+
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", movie.ID))
-	
+
 	err = app.writeJSON(w, http.StatusCreated, envelope{"movie": movie}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -50,25 +50,26 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
-
 	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
-
-	movie := data.Movie{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Title:     "Casablanca",
-		Runtime:   102,
-		Genres:    []string{"drama", "romance", "war"},
-		Version:   1,
+	// Call the Get() method to fetch the data for a specific movie. We also need to
+	// use the errors.Is() function to check if it returns a data.ErrRecordNotFound
+	// error, in which case we send a 404 Not Found response to the client.
+	movie, err := app.models.Movies.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
-
 	err = app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-
 }
