@@ -76,7 +76,6 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.notFoundResponse(w, r)
 		return
 	}
-
 	movie, err := app.models.Movies.Get(id)
 	if err != nil {
 		switch {
@@ -94,12 +93,17 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		Runtime *data.Runtime `json:"runtime"`
 		Genres  []string      `json:"genres"`
 	}
-
+	
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
+	
+	if input.Title != nil {
+		movie.Title = *input.Title
+	}
+	
 	if input.Year != nil {
 		movie.Year = *input.Year
 	}
@@ -109,9 +113,6 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	if input.Genres != nil {
 		movie.Genres = input.Genres 
 	}
-
-	movie.Genres = input.Genres
-
 	v := validator.New()
 	if data.ValidateMovie(v, movie); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
