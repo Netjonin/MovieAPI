@@ -9,13 +9,13 @@ import (
 )
 
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	// Create an anonymous struct to hold the expected data from the request body.
+
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	// Parse the request body into the anonymous struct.
+
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
@@ -50,6 +50,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
+		return
+	}
+
+	err = app.mailer.Send(user.Email, "user_welcome.tmpl.html", user)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
