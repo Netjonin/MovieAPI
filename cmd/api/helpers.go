@@ -119,11 +119,24 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	if s == "" {
 		return defaultValue
 	}
-	
+
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		v.AddError(key, "must be an integer value")
 		return defaultValue
 	}
 	return i
+}
+
+func (app *application) background(fn func() ) {
+	
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+			}
+		}()
+		
+		fn()
+	}()
 }
