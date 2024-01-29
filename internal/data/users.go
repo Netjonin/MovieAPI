@@ -88,7 +88,7 @@ func (m UserModel) Insert(user *User) error {
 	args := []any{user.Name, user.Email, user.Password.hash, user.Activated}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	
+
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.ID, &user.CreatedAt, &user.Version)
 	if err != nil {
 		switch {

@@ -151,7 +151,7 @@ func (m MovieModel) Delete(id int64) error {
 	return nil
 }
 
-func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie,  Metadata, error) {
+func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
 
 	query := fmt.Sprintf(`
 SELECT count(*) OVER(), id, created_at, title, year, runtime, genres, version
@@ -167,7 +167,7 @@ ORDER BY %s %s, id ASC LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDi
 
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil,  Metadata{}, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
