@@ -19,6 +19,8 @@ type UserModel struct {
 	DB *sql.DB
 }
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -27,6 +29,10 @@ type User struct {
 	Password  password  `json:"-"`
 	Activated bool      `json:"activated"`
 	Version   int       `json:"-"`
+}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
 
 type password struct {
@@ -161,9 +167,9 @@ RETURNING version`
 }
 
 func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error) {
-	
+
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
-	
+
 	query := `
 	SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
 	FROM users
@@ -172,12 +178,12 @@ func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*User, error)
 	WHERE tokens.hash = $1
 	AND tokens.scope = $2
 	AND tokens.expiry > $3`
-	
+
 	args := []any{tokenHash[:], tokenScope, time.Now()}
 	var user User
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	
+
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID,
 		&user.CreatedAt,
