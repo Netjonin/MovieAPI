@@ -154,7 +154,7 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 
 func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		
+
 		user := app.contextGetUser(r)
 		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
 		if err != nil {
@@ -168,4 +168,11 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 		next.ServeHTTP(w, r)
 	}
 	return app.requireActivatedUser(fn)
+}
+
+func (app *application) enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
 }
