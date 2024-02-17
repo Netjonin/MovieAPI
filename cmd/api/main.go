@@ -102,6 +102,10 @@ func main() {
 		return runtime.NumGoroutine()
 	}))
 
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
+
 	app := &application{
 		config: cfg,
 		logger: logger,
