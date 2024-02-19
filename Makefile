@@ -1,3 +1,7 @@
+# Include variables from the .envrc file
+# The content of the file was taken from the $HOME/.profile file
+include .envrc
+
 confirm:
 	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
 
