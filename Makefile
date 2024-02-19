@@ -2,7 +2,7 @@ confirm:
 	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
 
 run/api::
-	go run ./cmd/api
+	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
 
 db/psql:
 	psql ${GREENLIGHT_DB_DSN}
